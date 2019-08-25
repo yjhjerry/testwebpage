@@ -12,15 +12,20 @@ const getResult = (loc, label) => {
     fetch(finalURL)
         .then(response => response.json())
         .then(body => {
-            fs.appendFile('test2.txt', JSON.stringify(body.data) + '\n', (err) => {
+            fs.appendFile('test2.txt', JSON.stringify(body.data) + '\n', err => {
                 if (err) throw err;
-                console.log('Saved New Test!');
+                 else console.log('Saved New Test!');
             });
             setTimeout(() => {
                 fetch(body.data.jsonUrl)
                     .then(response => response.json())
                     .then(body => {
-                        console.log('The loadTime for ' + label + ' is: ' + body.data.average.firstView.loadTime + 'ms')
+                        let testResult = 'The loadTime for ' + label + ' is: ' + body.data.average.firstView.loadTime + 'ms';
+                        console.log(testResult);
+                        fs.appendFile('testresult.txt', testResult + '\n', err => {
+                            if(err) throw err;
+                            else console.log('Saved test result to file!');
+                        });
                     })
                     .catch(err => console.log('Error retrieving result for ' + label + '. Please check manually later:' + body.data.jsonUrl))
             }, 360000);
