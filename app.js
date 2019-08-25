@@ -6,8 +6,9 @@ const key = "A.9be9a5cd8b59f342bc083fe6187586ef";
 const baseURL = "https://www.webpagetest.org/runtest.php";
 const getLocationURL = 'https://www.webpagetest.org/getLocations.php?f=json&k=A'
 const siteURL = "www.smilescooter.com";
+const timeOut = 360000;
 
-//Wait for 6 min before querying for data
+// Wait for 6 min before querying for data
 const getData = (body) => {
     setTimeout(() => {
         fetch(body.data.jsonUrl)
@@ -15,13 +16,13 @@ const getData = (body) => {
             .then(body => {
                 let testResult = 'The loadTime for ' + body.data.from + ' is: ' + body.data.average.firstView.loadTime + 'ms';
                 console.log(testResult);
-                fs.appendFile('testresult.txt', testResult + '\n', err => {
+                fs.appendFile('testresult-nocdn.txt', testResult + '\n', err => {
                     if(err) throw err;
                     else console.log('Saved test result to file!');
                 });
             })
             .catch(err => console.log('Error retrieving result for ' + body.data.from + '. Please check manually later:' + body.data.jsonUrl))
-    }, 360000);
+    }, timeOut);
 }
 // Send test request to webpagetest.org servers
 const getResult = (loc) => {
@@ -29,16 +30,16 @@ const getResult = (loc) => {
     fetch(finalURL)
         .then(response => response.json())
         .then(body => {
-            fs.appendFile('test2.txt', JSON.stringify(body.data) + '\n', err => {
+            fs.appendFile('test-nocdn.txt', JSON.stringify(body.data) + '\n', err => {
                 if (err) throw err;
-                else console.log('Saved New Test!');
+                else console.log('Test request sent to ' + loc + ', please wait for ' + timeOut + 'ms to see the result');
                 getData(body);
             });
         })
         .catch(err => console.log('Error sending test: ' + err))
 };
 
-//Get various location sites of webpagetest.org
+// Get various location sites of webpagetest.org
 const testWebPage = () => {
     fetch(getLocationURL)
         .then(response => response.json())
