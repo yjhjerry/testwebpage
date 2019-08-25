@@ -1,20 +1,18 @@
+
 const fetch = require('node-fetch');
 const fs = require('fs');
 
+const key = "A.9be9a5cd8b59f342bc083fe6187586ef";
+const baseURL = "https://www.webpagetest.org/runtest.php";
+const getLocationURL = 'https://www.webpagetest.org/getLocations.php?f=json&k=A'
+const siteURL = "www.smilescooter.com";
 
-var key = "A.9be9a5cd8b59f342bc083fe6187586ef";
-var baseURL = "https://www.webpagetest.org/runtest.php";
-var siteURL = "www.smilescooter.com";
-// var locations = ["ec2-us-east-1", "ec2-us-west-1", "ec2-sa-east-1", "ec2-eu-west-1", "London_EC2", "ec2-eu-west-3", "ec2-eu-central-1", "ap-south-1", "ec2-ap-southeast-1", "ec2-ap-northeast-2", "ec2-ap-northeast-1", "ec2-ap-southeast-2"];
-var getStatusURL = "http://www.webpagetest.org/testStatus.php";
-var locations = ["ec2-sa-east-1", "ec2-eu-west-1"];
-
-locations.forEach(location => {
-    let finalURL = baseURL + "?url=" + siteURL + "&k=" + key + "&location=" + location + "&f=json&fvonly=1";
+const getResult = (loc, label) => {
+    let finalURL = baseURL + "?url=" + siteURL + "&k=" + key + "&location=" + loc + "&f=json&fvonly=1";
     fetch(finalURL)
         .then(response => response.json())
         .then(body => {
-            fs.appendFile('test1.txt', JSON.stringify(body.data) + '\n', (err) => {
+            fs.appendFile('test2.txt', JSON.stringify(body.data) + '\n', (err) => {
                 if (err) throw err;
                 console.log('Saved New Test!');
             });
@@ -22,10 +20,29 @@ locations.forEach(location => {
                 fetch(body.data.jsonUrl)
                     .then(response => response.json())
                     .then(body => {
-                        console.log('The loadTime for ' + location + ' is: ' + body.data.average.firstView.loadTime)
+                        console.log('The loadTime for ' + label + ' is: ' + body.data.average.firstView.loadTime)
                     })
-                    .catch(err => console.log('Error retrieving result: ' + err))
+                    .catch(err => console.log('Error retrieving result for ' + label + ':' + err))
             }, 360000);
         })
         .catch(err => console.log('Error sending test: ' + err))
-});
+};
+
+const testWebPage = () => {
+    fetch(getLocationURL)
+        .then(response => response.json())
+        .then(body => {         
+            let locations = body.data;
+            for(let loc in locations) {
+                if(locations.hasOwnProperty(loc)){
+                    let val = locations[loc];
+                    let label = val.Label;
+                    getResult(loc, label);
+                }
+            }
+        })
+        .catch(err => console.log('Something is wrong: ' + err))
+};
+
+testWebPage();
+
