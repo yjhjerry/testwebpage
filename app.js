@@ -20,9 +20,9 @@ const getResult = (loc, label) => {
                 fetch(body.data.jsonUrl)
                     .then(response => response.json())
                     .then(body => {
-                        console.log('The loadTime for ' + label + ' is: ' + body.data.average.firstView.loadTime)
+                        console.log('The loadTime for ' + label + ' is: ' + body.data.average.firstView.loadTime + 'ms')
                     })
-                    .catch(err => console.log('Error retrieving result for ' + label + ':' + err))
+                    .catch(err => console.log('Error retrieving result for ' + label + '. Please check manually later:' + body.data.jsonUrl))
             }, 360000);
         })
         .catch(err => console.log('Error sending test: ' + err))
