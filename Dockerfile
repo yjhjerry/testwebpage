@@ -1,9 +1,6 @@
 FROM node:alpine 
 WORKDIR app
-COPY package.json .
+COPY package*.json .
 RUN npm install > /dev/null
-COPY app.js .
-COPY test.js .
-COPY test-cdn.txt .
-
+COPY . . 
 CMD ["npm", "test"]
