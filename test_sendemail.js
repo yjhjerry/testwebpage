@@ -6,13 +6,23 @@ const fs = require('fs');
 const wptAPIKey = '';  //webpagetest.org API key
 const baseURL = 'https://www.webpagetest.org/runtest.php';  
 const getLocationURL = 'https://www.webpagetest.org/getLocations.php?f=json&k=A'
-const siteURL = 'https://www.smilescooter.com';
-const timeOut = 360000;  
+const timeOut = 180000;  
+let siteUrl = '';
 
-let today = new Date();
-let date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-let resultFile = date+'.'+time;
+const today = new Date();
+const date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+const resultFile = date+'.'+time;
+
+if (process.argv.length < 3) {
+    console.log('Please enter the site url that you want to test the speed with.');
+    process.exit();
+} else if (process.argv.length > 3) {
+    console.log('Please only enter one site url.');
+    process.exit();
+} else {
+    siteURL = process.argv[2];
+}
 
 const sendEmail = () => {
     const mailgunAPIKey = '';
@@ -38,17 +48,18 @@ const sendEmail = () => {
 const testWebPage = async () => {
     try {
         const response = await fetch(getLocationURL);
+        console.log('Location request sent');
         const body = await response.json();
         let locations = Object.keys(body.data);
-        // locations.splice(0,18);
 
         let runTestUrls = locations.map(location => {
-            let runTestUrl = baseURL + "?url=" + siteURL + "&k=" + wptAPIKey + "&location=" + location + "&f=json&fvonly=1";
+            let runTestUrl = `${baseURL}?url=${siteURL}&k=${wptAPIKey}&location=${location}&f=json&fvonly=1`;
             return fetch(runTestUrl).then(res => res.json().then(body => body.data.jsonUrl));
         });
 
         Promise.all(runTestUrls)
             .then(results => {
+                console.log('Test requests sent, it might take sometime before you get the result...');
                 let resultArr = results.map(result => {
                     return new Promise((resolve) => {
                         setTimeout(() => {
@@ -61,7 +72,11 @@ const testWebPage = async () => {
                     .then(res => {
                         res.forEach(test => {
                             if (test.statusCode == 200) {
-                                let testResult = 'The loadTime for ' + test.data.from + ' is: ' + test.data.average.firstView.loadTime + 'ms';
+                                let testLocation = test.data.from;
+                                testLocation = testLocation.replace(/<b>|<\/b>/g, "");
+                                let pageLoadTime = test.data.average.firstView.loadTime;
+                                let testResult = `The loadTime for ${testLocation} is: ${pageLoadTime} ms`;
+
                                 fs.appendFile(resultFile, testResult + '\n', err => {
                                     if (err) throw err;
                                 });
@@ -83,5 +98,3 @@ const testWebPage = async () => {
 }
 
 testWebPage();
-
-
