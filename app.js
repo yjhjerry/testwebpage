@@ -2,10 +2,10 @@
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-const wptKey = "";
-const baseURL = "https://www.webpagetest.org/runtest.php";
+const wptKey = '';
+const baseURL = 'https://www.webpagetest.org/runtest.php';
 const getLocationURL = 'https://www.webpagetest.org/getLocations.php?f=json&k=A'
-const siteURL = "https://www.smilescooter.com";
+const siteURL = 'https://www.smilescooter.com';
 const timeOut = 360000;
 
 let today = new Date();
@@ -46,34 +46,6 @@ const sendTestRequest = (loc) => {
         })
         .catch(err => console.log('Error sending test: ' + err))
 };
-
-// Send email
-const sendEmail = () => {
-
-    const API_KEY = '';
-    const DOMAIN = 'tg.smilescooter.com';
-    const mailgun = require('mailgun-js')({apiKey: API_KEY, domain: DOMAIN});
-    var content;
-
-    fs.readFile(resultFile, 'utf-8', (err, data) => {
-        if (err) {
-            throw err;
-        }
-        content = data;
-    });
-
-    const data = {
-      from: 'TestWebPage <jerry@tg.smilescooter.com>',
-      to: 'yjhjerry621@gmail.com',
-      subject: 'WebPageTest at ' + resultFile,
-      text: content
-    };
-
-    mailgun.messages().send(data, (err, body) => {
-        if(error) throw err;
-        else console.log(body);
-    });
-}
 
 // Get various location sites of webpagetest.org
 const testWebPage = () => {
